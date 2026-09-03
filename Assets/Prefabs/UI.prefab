@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7197626100425164947}
   - component: {fileID: 2236236808725699780}
   - component: {fileID: 8282623618274618385}
+  - component: {fileID: 3698867596173793052}
   m_Layer: 0
   m_Name: HUD
   m_TagString: Untagged
@@ -68,6 +69,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0fea4d95466241388ad16eb75d676c5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InGameHUD
+  reticleBaseSize: 80
+--- !u!114 &3698867596173793052
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 316593676404671401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27b888ffa6d82d74a9b350798131f093, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Oxygen.OxygenHud
 --- !u!1 &320253217878538870
 GameObject:
   m_ObjectHideFlags: 0

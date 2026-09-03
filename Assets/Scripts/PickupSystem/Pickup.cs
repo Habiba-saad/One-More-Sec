@@ -54,6 +54,15 @@ namespace Unity.MP_FPS.Pickups
         /// </summary>
         private void OnTriggerEnter(Collider other)
         {
+            // Collecting is the server's decision alone. Every machine in the match holds
+            // a copy of every player - the server's on the ServerPlayer layer, each
+            // client's on ClientPlayer - so without this test one walk-through would be
+            // collected once per copy, and the copies would disagree about who got it.
+            if (other.gameObject.layer != (int)LayerIndex.ServerPlayer)
+            {
+                return;
+            }
+
             // Look for the player on the object that touched us. GetComponentInParent is
             // used rather than GetComponent because the collider is usually on a child of
             // the player prefab, not on the root where PlayerController sits.

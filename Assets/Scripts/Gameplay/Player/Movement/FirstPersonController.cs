@@ -54,7 +54,8 @@ public class FirstPersonController : MonoBehaviour
             IsHit = 1 << 5,
             JumpTrigger = 1 << 6,
             LandTrigger = 1 << 7,
-            IsCrouching = 1 << 8
+            IsCrouching = 1 << 8,
+            IsRecharging = 1 << 9
         }
 
         //WARNING WARNING: Adding more members to this struct might break network serialisation speak to Claire/Andy B
@@ -125,6 +126,15 @@ public class FirstPersonController : MonoBehaviour
         {
             get => (StateFlags & (uint)StateFlag.IsCrouching) != 0;
             set => SetFlag(StateFlag.IsCrouching, value);
+        }
+
+        // Standing still to refill the air supply. A flag bit for the same reason as
+        // IsCrouching above - see the network serialisation warning.
+        [GhostField(SendData = false)]
+        public bool IsRecharging
+        {
+            get => (StateFlags & (uint)StateFlag.IsRecharging) != 0;
+            set => SetFlag(StateFlag.IsRecharging, value);
         }
 
         public quaternion CurrentRotation;
@@ -847,8 +857,39 @@ public class FirstPersonController : MonoBehaviour
     }
 
     public static void AccumulateMovement(ref ControllerState state,
-        ref float3 accumulatedMovement, in PlayerInput input, in ControllerConsts consts, float deltaTime)
+        ref float3 accumulatedMovement, in PlayerInput rawInput, in ControllerConsts consts, float deltaTime)
     {
+        // Recharging is resolved here, and from the input alone, rather than on the server
+        // by itself. The client predicts its own movement by calling this same method with
+        // this same PlayerInput, so deciding it anywhere else would let the two disagree
+        // about whether the player may move and rubber-band them every tick.
+        var input = rawInput;
+
+        // Set rather than flipped, so that processing the same command twice lands on the
+        // same answer. ServerPlayerMovementSystem replays the last input it received to
+        // cover ticks lost in transit, and a flip would leave the server recharging when
+        // the client is not. Stopping is what moving is for.
+        if (input.RechargeToggle)
+        {
+            state.IsRecharging = true;
+        }
+
+        // Trying to play cancels the refill - moving, jumping and shooting all drop out of
+        // it, and getting back to recharging costs another press.
+        if (state.IsRecharging &&
+            (math.lengthsq(input.MoveInput) > 0f || input.Jump || input.Shoot))
+        {
+            state.IsRecharging = false;
+        }
+
+        if (state.IsRecharging)
+        {
+            // Dropped before anything below reads them, so the player is rooted while the
+            // air comes back. Gravity is untouched, so they still fall off a ledge.
+            input.MoveInput = float2.zero;
+            input.SetFlag(PlayerInput.InputFlag.Jump, false);
+        }
+
         state.TimeInState += deltaTime;
 
         // Resolve the stance first, since it decides which speed consts apply below.

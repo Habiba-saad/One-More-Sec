@@ -81,6 +81,8 @@ GameObject:
   - component: {fileID: 5189483525945704937}
   - component: {fileID: 1290565221828185357}
   - component: {fileID: 2981078123423107296}
+  - component: {fileID: 4234114073020964792}
+  - component: {fileID: -8223600443337949996}
   m_Layer: 0
   m_Name: ArmaturePlayer_Rifle
   m_TagString: Untagged
@@ -300,6 +302,34 @@ MonoBehaviour:
   minIntensity: 0.4
   maxIntensity: 0.8
   fadeSpeed: 2
+--- !u!114 &4234114073020964792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4348258020634402416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d50984566b89e06479f0060489b4dfdb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Oxygen.PlayerOxygenAuthoring
+  <StartingSeconds>k__BackingField: 60
+  <DrainPerSecond>k__BackingField: 1
+  <RechargePerSecond>k__BackingField: 2
+  <SuffocationDamagePerSecond>k__BackingField: 10
+--- !u!114 &-8223600443337949996
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4348258020634402416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bd4e64d987dbf1649a9326d0786dd5b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Pickups.PlayerPickupBridge
 --- !u!1 &4657941816999191273
 GameObject:
   m_ObjectHideFlags: 0

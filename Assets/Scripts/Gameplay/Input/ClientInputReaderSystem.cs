@@ -109,5 +109,12 @@ public partial class ClientInputReaderSystem : SystemBase
         // key is down, not just the tick the key went down on.
         playerInput.SetFlag(PlayerInput.InputFlag.Sprint, controls.Player.Sprint.IsPressed());
         playerInput.SetFlag(PlayerInput.InputFlag.Crouch, controls.Player.Crouch.IsPressed());
+
+        // Sampled as a one-off press, because it toggles a latched state rather than
+        // driving it while held. WasPressedThisFrame rather than triggered, because the
+        // Interact action carries a Hold interaction in the .inputactions asset and
+        // triggered would only fire once the hold time had elapsed.
+        playerInput.SetFlag(PlayerInput.InputFlag.RechargeToggle,
+            controls.Player.Interact.WasPressedThisFrame());
     }
 }

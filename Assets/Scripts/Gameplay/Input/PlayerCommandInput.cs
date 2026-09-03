@@ -11,7 +11,8 @@ public struct PlayerInput
         Shoot = 1 << 1,
         Sprint = 1 << 2,
         Reload = 1 << 3,
-        Crouch = 1 << 4
+        Crouch = 1 << 4,
+        RechargeToggle = 1 << 5
     }
 
     public float2 MoveInput;
@@ -27,6 +28,10 @@ public struct PlayerInput
     // so they stay set for as long as the player holds the key.
     public bool Sprint => (InputFlags & (uint)InputFlag.Sprint) != 0;
     public bool Crouch => (InputFlags & (uint)InputFlag.Crouch) != 0;
+
+    // A single press like Jump rather than a held key: it flips recharging on and off.
+    // The latched state itself lives on ControllerState, not here.
+    public bool RechargeToggle => (InputFlags & (uint)InputFlag.RechargeToggle) != 0;
 
     public void SetFlag(InputFlag flag, bool set)
     {
