@@ -53,7 +53,8 @@ public class FirstPersonController : MonoBehaviour
             IsReloading = 1 << 4,
             IsHit = 1 << 5,
             JumpTrigger = 1 << 6,
-            LandTrigger = 1 << 7
+            LandTrigger = 1 << 7,
+            IsCrouching = 1 << 8
         }
 
         //WARNING WARNING: Adding more members to this struct might break network serialisation speak to Claire/Andy B
@@ -115,6 +116,15 @@ public class FirstPersonController : MonoBehaviour
         {
             get => (StateFlags & (uint)StateFlag.LandTrigger) != 0;
             set => SetFlag(StateFlag.LandTrigger, value);
+        }
+
+        // Stored as a flag bit rather than a new field, so the serialised size of this
+        // struct is unchanged - see the network serialisation warning above.
+        [GhostField(SendData = false)]
+        public bool IsCrouching
+        {
+            get => (StateFlags & (uint)StateFlag.IsCrouching) != 0;
+            set => SetFlag(StateFlag.IsCrouching, value);
         }
 
         public quaternion CurrentRotation;
@@ -182,6 +192,7 @@ public class FirstPersonController : MonoBehaviour
 
         public StateConsts Walk;
         public StateConsts Sprint;
+        public StateConsts Crouch;
 
         public float JumpHeight;
         public float Gravity;
@@ -194,6 +205,11 @@ public class FirstPersonController : MonoBehaviour
         public float GroundedOffset;
         public LayerMask GroundLayers;
         public float TerminalVelocity;
+
+        // Capsule dimensions, baked from the CharacterController on the player prefab.
+        public float StandHeight;
+        public float CrouchHeight;
+        public float CharacterRadius;
     }
 
     [field: Header("Cinemachine")]
@@ -220,6 +236,15 @@ public class FirstPersonController : MonoBehaviour
 
     private CharacterController m_Controller;
     public CharacterController CharacterController => m_Controller;
+
+    // Stance / crouch state. The capsule itself is driven from the predicted movement
+    // state; the view height is eased separately and is purely cosmetic.
+    private const float k_ViewCrouchSpeed = 6f;
+    private Transform m_ViewPoint;
+    private Vector3 m_ViewPointStandLocalPosition;
+    private Vector3 m_ControllerStandCenter;
+    private float m_ViewCrouchOffset;
+    private float m_ViewCrouchTargetOffset;
 
     private PlayerGhost m_PlayerGhost;
     private PlayerGhost PlayerGhost => m_PlayerGhost;
@@ -257,6 +282,38 @@ public class FirstPersonController : MonoBehaviour
         TryGetComponent(out m_DamageVisualsController);
         Debug.Assert(m_DamageVisualsController,
             "[FIRSTPERSONCONTROLLER] Player has no DamageVisualsController component");
+
+        // Remember the authored standing pose so the crouch can be expressed as an
+        // offset from it instead of hard coding prefab values here.
+        if (m_Controller != null)
+        {
+            m_ControllerStandCenter = m_Controller.center;
+        }
+
+        m_ViewPoint = transform.Find("ViewPoint");
+        if (m_ViewPoint != null)
+        {
+            m_ViewPointStandLocalPosition = m_ViewPoint.localPosition;
+        }
+    }
+
+    private void LateUpdate()
+    {
+        // Cosmetic easing of the eye height. This deliberately lives outside the
+        // predicted movement step: it must never influence collision or hit detection,
+        // and it runs once per rendered frame rather than once per simulated tick.
+        if (m_ViewPoint == null || m_PlayerGhost == null ||
+            m_PlayerGhost.Role != MultiplayerRole.ClientOwned)
+        {
+            return;
+        }
+
+        m_ViewCrouchOffset = Mathf.MoveTowards(m_ViewCrouchOffset, m_ViewCrouchTargetOffset,
+            k_ViewCrouchSpeed * Time.deltaTime);
+
+        var localPosition = m_ViewPointStandLocalPosition;
+        localPosition.y += m_ViewCrouchOffset;
+        m_ViewPoint.localPosition = localPosition;
     }
 
     public void SetExcludeLayers(LayerMask excludeLayers)
@@ -267,12 +324,65 @@ public class FirstPersonController : MonoBehaviour
     public void ApplyMovementUpdate(ref ControllerState state, in ControllerConsts consts,
         in float3 accumulatedMovement, float deltaTime)
     {
+        ApplyStance(in state, in consts);
         ApplyMove(ref state, consts, accumulatedMovement, deltaTime);
         GroundedCheck(ref state, consts);
 
         // cache latest values for access outside of entity data
         CachedJumpFallSpeed = state.JumpFallSpeed;
         CachedFallHeight = state.FallHeight;
+    }
+
+    /// <summary>
+    /// Resizes the character capsule to match the current stance. The capsule doubles as
+    /// the server side hitbox, so the height is switched instantly rather than eased:
+    /// that keeps it a pure function of this tick's input flag, which is what lets the
+    /// server and the predicting client arrive at the same collider every time.
+    /// </summary>
+    private void ApplyStance(in ControllerState state, in ControllerConsts consts)
+    {
+        if (m_Controller == null || consts.StandHeight <= 0f || consts.CrouchHeight <= 0f)
+        {
+            return;
+        }
+
+        float targetHeight = state.IsCrouching ? consts.CrouchHeight : consts.StandHeight;
+
+        if (!Mathf.Approximately(m_Controller.height, targetHeight))
+        {
+            m_Controller.height = targetHeight;
+
+            // Keep the feet planted: the authored centre sits at half the authored
+            // height, so shrinking the capsule has to lower the centre by half as much.
+            var center = m_ControllerStandCenter;
+            center.y = m_ControllerStandCenter.y - (consts.StandHeight - targetHeight) * 0.5f;
+            m_Controller.center = center;
+        }
+
+        m_ViewCrouchTargetOffset = state.IsCrouching ? consts.CrouchHeight - consts.StandHeight : 0f;
+    }
+
+    /// <summary>
+    /// Tests whether something overhead blocks standing back up. Only level geometry is
+    /// considered, so that the server and the client reach the same answer - player
+    /// colliders sit on role specific layers and would not match between the two.
+    /// </summary>
+    private static bool IsBlockedFromStanding(in ControllerState state, in ControllerConsts consts)
+    {
+        if (consts.CharacterRadius <= 0f || consts.StandHeight <= consts.CrouchHeight)
+        {
+            return false;
+        }
+
+        // Sweep the slice of the standing capsule that the crouched capsule does not cover.
+        float radius = consts.CharacterRadius;
+        float3 feet = state.CurrentPosition;
+        float3 bottom = feet + new float3(0f, math.max(consts.CrouchHeight - radius, radius), 0f);
+        float3 top = feet + new float3(0f, math.max(consts.StandHeight - radius, radius), 0f);
+
+        // Probe slightly narrower than the capsule so brushing a wall is not read as a ceiling.
+        return Physics.CheckCapsule(bottom, top, radius * 0.95f, consts.GroundLayers,
+            QueryTriggerInteraction.Ignore);
     }
 
     private static void SetMovementType(ref ControllerState state, MovementType type)
@@ -680,7 +790,20 @@ public class FirstPersonController : MonoBehaviour
                 case MovementType.Standing:
                 case MovementType.Jumping:
                 case MovementType.Falling:
-                    stateConsts = consts.Walk;
+                    // Crouch wins over sprint, so holding both keys leaves the player crouched.
+                    if (state.IsCrouching)
+                    {
+                        stateConsts = consts.Crouch;
+                    }
+                    else if (input.Sprint)
+                    {
+                        stateConsts = consts.Sprint;
+                    }
+                    else
+                    {
+                        stateConsts = consts.Walk;
+                    }
+
                     break;
                 default:
                     Debug.LogError(
@@ -727,6 +850,17 @@ public class FirstPersonController : MonoBehaviour
         ref float3 accumulatedMovement, in PlayerInput input, in ControllerConsts consts, float deltaTime)
     {
         state.TimeInState += deltaTime;
+
+        // Resolve the stance first, since it decides which speed consts apply below.
+        // Releasing crouch under a low ceiling is refused rather than letting the player
+        // grow back into whatever is above them.
+        bool wantsToCrouch = input.Crouch;
+        if (!wantsToCrouch && state.IsCrouching && IsBlockedFromStanding(in state, in consts))
+        {
+            wantsToCrouch = true;
+        }
+
+        state.IsCrouching = wantsToCrouch;
 
         AccumulateJumpAndGravity(ref state, input, consts, deltaTime);
 

@@ -16,6 +16,10 @@ namespace Unity.MP_FPS.Upgrades
         // scanning player apart from the opponents it is searching through.
         int PlayerId { get; }
 
+        // The player's OxygenSystem, seen only as "something upgrades can be paid from".
+        // Used by UpgradeController, which is the one class that charges for an upgrade.
+        IOxygenBank Oxygen { get; }
+
         // The player's PlayerMovement, seen only as "something whose speed can be changed".
         // Used by SpeedBoost.
         IMovementModifier Movement { get; }

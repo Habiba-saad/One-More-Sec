@@ -34,6 +34,22 @@ public class PredictedPlayerControllerConstsAuthoring : MonoBehaviour
     [field: SerializeField] public float SprintAnimationMotionScale { get; private set; } = 0.1f;
 
     [field: Space(10)]
+    [field: Header("Player Crouching")]
+    [field: SerializeField, Tooltip("Crouch speed of the character in m/s")]
+    public float CrouchSpeed { get; private set; } = 1.2f;
+
+    [field: SerializeField, Tooltip("Acceleration and deceleration while crouched")]
+    public float CrouchSpeedChangeRate { get; private set; } = 10.0f;
+
+    [field: SerializeField, Tooltip("How fast the character turns to face movement direction while crouched")]
+    public float CrouchRotationSmoothTime { get; private set; } = 0.2f;
+
+    [field: SerializeField] public float CrouchAnimationMotionScale { get; private set; } = 0.4f;
+
+    [field: SerializeField, Tooltip("Height of the character capsule while crouched, in metres. The standing height and the radius are read from the CharacterController on this prefab")]
+    public float CrouchHeight { get; private set; } = 0.9f;
+
+    [field: Space(10)]
     [field: Header("Player Jumping and Gravity")]
     [field: SerializeField, Tooltip("The height the player can jump")]
     public float JumpHeight { get; private set; } = 1.2f;
@@ -78,6 +94,14 @@ public class PredictedPlayerControllerConstsBaker : Baker<PredictedPlayerControl
     public override void Bake(PredictedPlayerControllerConstsAuthoring authoring)
     {
         var entity = GetEntity(TransformUsageFlags.None);
+
+        // The standing capsule is read from the CharacterController rather than authored
+        // twice, so resizing the character on the prefab cannot drift from the crouch
+        // maths. Without one the stance code leaves the capsule untouched.
+        var characterController = GetComponent<CharacterController>();
+        float standHeight = characterController != null ? characterController.height : 0f;
+        float characterRadius = characterController != null ? characterController.radius : 0f;
+
         AddComponent(entity, new PredictedPlayerControllerConsts
         {
             ControllerConsts = new FirstPersonController.ControllerConsts
@@ -93,6 +117,10 @@ public class PredictedPlayerControllerConstsBaker : Baker<PredictedPlayerControl
                 GroundedOffset = authoring.GroundedOffset,
                 GroundLayers = authoring.GroundLayers,
                 TerminalVelocity = authoring.TerminalVelocity,
+
+                StandHeight = standHeight,
+                CrouchHeight = math.min(authoring.CrouchHeight, standHeight),
+                CharacterRadius = characterRadius,
 
                 Walk = new FirstPersonController.ControllerConsts.StateConsts
                 {
@@ -110,6 +138,15 @@ public class PredictedPlayerControllerConstsBaker : Baker<PredictedPlayerControl
                     SpeedChangeRate = authoring.SprintSpeedChangeRate,
                     LandingSpeedMult = authoring.SprintLandingSpeedMultiplier,
                     AnimationMotionScale = authoring.SprintAnimationMotionScale,
+                },
+
+                Crouch = new FirstPersonController.ControllerConsts.StateConsts
+                {
+                    Speed = authoring.CrouchSpeed,
+                    RotationSmoothTime = authoring.CrouchRotationSmoothTime,
+                    SpeedChangeRate = authoring.CrouchSpeedChangeRate,
+                    LandingSpeedMult = 1f,
+                    AnimationMotionScale = authoring.CrouchAnimationMotionScale,
                 },
             }
         });

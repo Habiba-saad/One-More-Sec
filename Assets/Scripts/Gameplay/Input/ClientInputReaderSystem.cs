@@ -103,5 +103,11 @@ public partial class ClientInputReaderSystem : SystemBase
         playerInput.SetFlag(PlayerInput.InputFlag.Jump, controls.Player.Jump.triggered);
         playerInput.SetFlag(PlayerInput.InputFlag.Shoot, controls.FPS.ShootSingle.IsPressed());
         playerInput.SetFlag(PlayerInput.InputFlag.Reload, controls.FPS.Reload.triggered);
+
+        // Sprint and crouch are held down rather than tapped, so they are sampled with
+        // IsPressed instead of triggered - the flag has to survive for every tick the
+        // key is down, not just the tick the key went down on.
+        playerInput.SetFlag(PlayerInput.InputFlag.Sprint, controls.Player.Sprint.IsPressed());
+        playerInput.SetFlag(PlayerInput.InputFlag.Crouch, controls.Player.Crouch.IsPressed());
     }
 }

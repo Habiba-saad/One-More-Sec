@@ -9,7 +9,9 @@ public struct PlayerInput
     {
         Jump = 1 << 0,
         Shoot = 1 << 1,
-        Reload = 1 << 3
+        Sprint = 1 << 2,
+        Reload = 1 << 3,
+        Crouch = 1 << 4
     }
 
     public float2 MoveInput;
@@ -20,6 +22,11 @@ public struct PlayerInput
     public bool Jump => (InputFlags & (uint)InputFlag.Jump) != 0;
     public bool Shoot => (InputFlags & (uint)InputFlag.Shoot) != 0;
     public bool Reload => (InputFlags & (uint)InputFlag.Reload) != 0;
+
+    // Sprint and Crouch describe a continuous state rather than a one-off action,
+    // so they stay set for as long as the player holds the key.
+    public bool Sprint => (InputFlags & (uint)InputFlag.Sprint) != 0;
+    public bool Crouch => (InputFlags & (uint)InputFlag.Crouch) != 0;
 
     public void SetFlag(InputFlag flag, bool set)
     {
@@ -33,6 +40,10 @@ public struct PlayerInput
         }
     }
 
+    // Flags are OR-ed together so that a press happening between two ticks is never
+    // dropped. For the held flags (Sprint, Crouch) this means a release can linger for
+    // a single tick, which is harmless: the server and the predicting client both read
+    // the exact same ClientCommandInput, so they stay in agreement either way.
     public void UpdateFrom(in PlayerInput input)
     {
         InputFlags |= input.InputFlags;
