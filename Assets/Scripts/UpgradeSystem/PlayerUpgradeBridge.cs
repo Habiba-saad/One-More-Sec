@@ -96,12 +96,20 @@ namespace Unity.MP_FPS.Upgrades
         [SerializeField]
         private SuitUpgradeData m_DamageBoostData;
 
+        [Tooltip("The PlayerScanData asset. Left empty, this player cannot buy the scan.")]
+        [SerializeField]
+        private SuitUpgradeData m_PlayerScanData;
+
         // This player's own upgrade objects, built once on the server. Never shared with
         // another player: a SuitUpgrade remembers whether it is running, so two players
         // holding one instance would fight over that flag.
         private UpgradeController m_Controller;
         private SpeedBoost m_SpeedBoost;
         private DamageBoost m_DamageBoost;
+        private PlayerScan m_PlayerScan;
+
+        // The map service living next to this component, found once through its interface.
+        private IRevealService m_Reveal;
 
         // Everything currently multiplying this player's move speed.
         private readonly MultiplierSet m_SpeedMultipliers = new MultiplierSet();
@@ -121,10 +129,27 @@ namespace Unity.MP_FPS.Upgrades
         public IMovementModifier Movement => this;
         public IDamageModifier Combat => this;
 
-        // Not wired yet - PlayerScan is the next job. Null is what the upgrade classes
-        // already test for, so an unwired upgrade reports a clear error rather than
-        // throwing in the middle of a match.
-        public IRevealService Reveal => null;
+        // The one sub-system this bridge does not play itself, because revealing somebody
+        // needs to know where every player in the match is standing and that is nothing to
+        // do with adapting this player to the upgrades.
+        //
+        // Asked for by its interface rather than by its class, so this file still knows
+        // nothing about MapRevealSystem beyond the contract in Contracts/ - Unity resolves
+        // an interface to whichever component on this GameObject implements it.
+        public IRevealService Reveal
+        {
+            get
+            {
+                // Looked up again while it is missing rather than remembered as missing,
+                // so adding the component to a prefab mid-session starts working at once.
+                if (m_Reveal == null)
+                {
+                    m_Reveal = GetComponent<IRevealService>();
+                }
+
+                return m_Reveal;
+            }
+        }
 
         // ---------- IOxygenBank ----------
 
@@ -277,6 +302,7 @@ namespace Unity.MP_FPS.Upgrades
                 var input = playerGhost.ServerMovementInput;
                 TryPurchase(input.BuySpeedBoost, m_SpeedBoost, "speed boost");
                 TryPurchase(input.BuyDamageBoost, m_DamageBoost, "damage boost");
+                TryPurchase(input.BuyPlayerScan, m_PlayerScan, "player scan");
             }
 
             // Ages the running upgrades and deactivates whatever reached zero.
@@ -325,8 +351,18 @@ namespace Unity.MP_FPS.Upgrades
         /// </summary>
         private void TryPurchase(bool wanted, SuitUpgrade upgrade, string label)
         {
-            if (!wanted || upgrade == null)
+            if (!wanted)
             {
+                return;
+            }
+
+            // Pressed the key for something this player does not have. Said out loud
+            // rather than ignored: a missing data asset or a missing MapRevealSystem looks
+            // exactly like a dead key from the player's side, and silence there costs an
+            // afternoon of wondering why nothing happens.
+            if (upgrade == null)
+            {
+                Debug.LogWarning($"{name}: {label} was asked for, but this player has no such upgrade - check its data asset on the prefab.", this);
                 return;
             }
 
@@ -359,6 +395,19 @@ namespace Unity.MP_FPS.Upgrades
             {
                 m_DamageBoost = new DamageBoost(m_DamageBoostData);
                 catalogue.Add(m_DamageBoost);
+            }
+
+            // The scan is only offered when there is something to reveal onto. Without a
+            // map service it would throw the moment it was bought, and a player who cannot
+            // be shown anything is better off keeping their oxygen.
+            if (m_PlayerScanData != null && Reveal != null)
+            {
+                m_PlayerScan = new PlayerScan(m_PlayerScanData);
+                catalogue.Add(m_PlayerScan);
+            }
+            else if (m_PlayerScanData != null)
+            {
+                Debug.LogWarning($"{name}: PlayerScanData is assigned but no MapRevealSystem sits on this player, so the scan cannot be bought.", this);
             }
 
             // An empty catalogue means every data field was left empty on the prefab,

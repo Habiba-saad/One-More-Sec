@@ -41,6 +41,12 @@ namespace Gameplay.Leaderboard
             [GhostField] public FixedString64Bytes PlayerName;
             [GhostField] public int Kills;
             [GhostField] public int Deaths;
+
+            // Rounds this player has taken. Kept here with the kills rather than in a
+            // tally of its own inside MatchManager, so the results board reads one list
+            // instead of joining two together, and so a player who leaves takes all of
+            // their numbers with them in one go.
+            [GhostField] public int RoundWins;
         }
 
         private void Awake()
@@ -131,6 +137,33 @@ namespace Gameplay.Leaderboard
         private void AnnounceKillFeed(int killer, int victim)
         {
             _killQueue.Enqueue(new KillInfo { KillerId = killer, VictimId = victim });
+        }
+
+        /// <summary>
+        /// Records that this player won a round. Called by MatchManager, which is the only
+        /// thing that decides a round - this method just writes the number down.
+        /// </summary>
+        public void AddRoundWin(int networkId)
+        {
+            if (Role != MultiplayerRole.Server)
+            {
+                Debug.LogWarning("AddRoundWin can only be called on the server.");
+                return;
+            }
+
+            if (!GhostGameObject.IsGhostLinked()) return;
+
+            var buffer = GhostGameObject.GetGhostDynamicBuffer<PlayerScoreEntry>();
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                if (buffer[i].NetworkId == networkId)
+                {
+                    var entry = buffer[i];
+                    entry.RoundWins++;
+                    buffer[i] = entry;
+                    return;
+                }
+            }
         }
 
         public void AddDeath(int networkId)

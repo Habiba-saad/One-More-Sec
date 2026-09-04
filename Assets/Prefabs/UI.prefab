@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8282623618274618385}
   - component: {fileID: 3698867596173793052}
   - component: {fileID: 3296214419366057403}
+  - component: {fileID: 3070056572366250197}
   m_Layer: 0
   m_Name: HUD
   m_TagString: Untagged
@@ -110,6 +111,26 @@ MonoBehaviour:
     HotKeyLabel: 3
   m_CellSize: 90
   m_ScreenMargin: 24
+  m_GapAboveHealthBar: 26
+  m_FallbackBottomMargin: 92
+--- !u!114 &3070056572366250197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 316593676404671401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ed2d321a2b865640b040de553c1e195, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Minimap.MinimapController
+  m_Diameter: 190
+  m_ScreenMargin: 20
+  m_RangeMetres: 150
+  m_MapTexture: {fileID: 0}
+  m_SelfColor: {r: 0.45, g: 0.95, b: 1, a: 1}
+  m_RevealedColor: {r: 1, g: 0.35, b: 0.35, a: 1}
 --- !u!1 &320253217878538870
 GameObject:
   m_ObjectHideFlags: 0

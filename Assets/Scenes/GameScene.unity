@@ -13740,6 +13740,67 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5258241512367921664, guid: 58af03db3677aa64fbd5f4fdb3dd0139, type: 3}
   m_PrefabInstance: {fileID: 1432692746256985054}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1687562465
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1687562467}
+  - component: {fileID: 1687562466}
+  m_Layer: 0
+  m_Name: MatchManagerSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1687562466
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1687562465}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e353a2af93409f14087238ac8353a7f9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GhostSpawner
+  <GhostPrefabReference>k__BackingField:
+    <GhostPrefab>k__BackingField:
+      m_AssetGUID: 1f008a395bd3ba14aafdcd9a573b80f4
+      m_SubObjectName: 
+      m_SubObjectType: 
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    m_GhostGuid:
+      Value:
+        x: 2477261041
+        y: 1101741493
+        z: 2849824682
+        w: 1325970293
+  <RandomiseRotation>k__BackingField: 0
+  <UniformScaleOverride>k__BackingField: 0
+  <PersistGameObject>k__BackingField: 0
+  <LockedBehindFeature>k__BackingField: 
+--- !u!4 &1687562467
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1687562465}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1688041892 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7174662732773419803, guid: f3b1d97666d0bfc48b7e3f606baab5a8, type: 3}
@@ -76931,6 +76992,7 @@ SceneRoots:
   - {fileID: 13611506}
   - {fileID: 2438460407750367817}
   - {fileID: 1969286398655483589}
+  - {fileID: 1687562467}
   - {fileID: 337308408}
   - {fileID: 1105370249}
   - {fileID: 1572035680}

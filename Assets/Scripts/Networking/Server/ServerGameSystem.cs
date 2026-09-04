@@ -5,6 +5,7 @@ using Unity.Burst;
 using Unity.CharacterController;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.MP_FPS.Match;
 using Unity.NetCode;
 using Unity.Physics;
 using Random = Unity.Mathematics.Random;
@@ -268,11 +269,15 @@ namespace Unity.MP_FPS
                     var networkId = ghostOwner.ValueRO.NetworkId;
                     var connectionEntity = clientsMap[ghostOwner.ValueRO.NetworkId].ConnectionEntity;
 
-                    // Add a respawn timer to the connection
+                    // Mark the connection as waiting for a character. The timer is left at
+                    // zero because it is no longer what decides when they come back:
+                    // MatchManager does, by opening the respawn window at the start of the
+                    // next round. A player killed in round one sits out the rest of it,
+                    // which is the whole point of playing rounds.
                     if (!SystemAPI.HasComponent<PendingRespawn>(connectionEntity))
                     {
-                        Debug.Log($"[Server] Player {entity} has died. Starting respawn timer for connection {connectionEntity}.");
-                        ecb.AddComponent(connectionEntity, new PendingRespawn { RespawnTimer = 5f });
+                        Debug.Log($"[Server] Player {entity} has died and is out until the next round.");
+                        ecb.AddComponent(connectionEntity, new PendingRespawn { RespawnTimer = 0f });
                     }
                     
                     if (SystemAPI.HasComponent<PlayerClientCommandInputLookup>(entity))
@@ -290,12 +295,24 @@ namespace Unity.MP_FPS
             }
 
             // --- Part 2: Countdown Timers and Respawn Players ---
+
+            // Whether anybody may be put back on the field at all. MatchManager opens this
+            // window for the moment a round starts and closes it again, so a player killed
+            // mid-round stays out until the next one. Without a match running - no manager
+            // ghost yet, or a test scene without one - the old behaviour is kept and
+            // players come straight back, so the level is still walkable on its own.
+            bool matchAllowsRespawn = true;
+            if (SystemAPI.TryGetSingleton<MatchManager.MatchStateData>(out var matchState))
+            {
+                matchAllowsRespawn = matchState.AllowsRespawn;
+            }
+
             foreach (var (pendingRespawn, connection, entity) in
                      SystemAPI.Query<RefRW<PendingRespawn>, RefRO<NetworkId>>().WithEntityAccess())
             {
                 pendingRespawn.ValueRW.RespawnTimer -= SystemAPI.Time.DeltaTime;
 
-                if (pendingRespawn.ValueRO.RespawnTimer <= 0f)
+                if (pendingRespawn.ValueRO.RespawnTimer <= 0f && matchAllowsRespawn)
                 {
                     Debug.Log($"[Server] Respawning player for connection {entity}.");
 

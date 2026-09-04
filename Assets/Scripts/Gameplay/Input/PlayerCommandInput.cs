@@ -14,7 +14,8 @@ public struct PlayerInput
         Crouch = 1 << 4,
         RechargeToggle = 1 << 5,
         BuySpeedBoost = 1 << 6,
-        BuyDamageBoost = 1 << 7
+        BuyDamageBoost = 1 << 7,
+        BuyPlayerScan = 1 << 8
     }
 
     public float2 MoveInput;
@@ -44,6 +45,9 @@ public struct PlayerInput
     // an id, because the shop panel that replaces both of them will send a purchase
     // request of its own and neither flag will survive it.
     public bool BuyDamageBoost => (InputFlags & (uint)InputFlag.BuyDamageBoost) != 0;
+
+    // And the scan, which is the third and last of the placeholder purchase flags.
+    public bool BuyPlayerScan => (InputFlags & (uint)InputFlag.BuyPlayerScan) != 0;
 
     public void SetFlag(InputFlag flag, bool set)
     {

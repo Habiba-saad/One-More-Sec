@@ -4,6 +4,7 @@ using Unity.Mathematics;
 using Unity.NetCode;
 using Unity.Transforms;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 [UpdateInGroup(typeof(GhostInputSystemGroup))]
 public partial class ClientInputReaderSystem : SystemBase
@@ -125,5 +126,14 @@ public partial class ClientInputReaderSystem : SystemBase
         // And Player.Next - the "2" key - for the damage boost, on the same terms.
         playerInput.SetFlag(PlayerInput.InputFlag.BuyDamageBoost,
             controls.Player.Next.WasPressedThisFrame());
+
+        // The scan has no action of its own to borrow, so the "3" key is read straight off
+        // the keyboard. Deliberately not added to InputSystem_Actions: that file is
+        // generated from the .inputactions asset, and adding a throwaway action to it
+        // would put a placeholder into a file the whole team regenerates. The keyboard can
+        // be absent on a device with none, hence the guard.
+        var keyboard = Keyboard.current;
+        playerInput.SetFlag(PlayerInput.InputFlag.BuyPlayerScan,
+            keyboard != null && keyboard.digit3Key.wasPressedThisFrame);
     }
 }

@@ -1,4 +1,5 @@
 using Unity.Entities;
+using Unity.MP_FPS.Minimap;
 using Unity.MP_FPS.Upgrades;
 using UnityEngine;
 
@@ -29,6 +30,10 @@ public class PredictedPlayerGhostBaker : Baker<PredictedPlayerGhostAuthoring>
         // because a component that is not on the prefab is not part of the ghost and would
         // never reach the client at all.
         AddBuffer<ActiveUpgradeStatus>(entity);
+
+        // Baked for the same reason: who this player can see on their map is replicated to
+        // them alone, and a buffer that is not on the prefab is not part of the ghost.
+        AddBuffer<RevealedPlayer>(entity);
 
         AddComponent<PlayerInputComponent>(entity);
     }

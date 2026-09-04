@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Entities;
+using Unity.MP_FPS.Oxygen;
 using Unity.NetCode;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -92,6 +93,11 @@ namespace Unity.MP_FPS.Upgrades
         // buffer every frame, and kept as a field so that reading it allocates nothing.
         private readonly Dictionary<int, float> m_Running = new Dictionary<int, float>();
 
+        // The air this player has left, which is also their wallet. Starts at infinity so
+        // that a player whose oxygen cannot be read is never told they are too poor to buy
+        // something - the server would refuse the purchase anyway if they really were.
+        private float m_OxygenSeconds = float.PositiveInfinity;
+
         // The panel itself, so it can be hidden while there is no player to show it for.
         private VisualElement m_Panel;
 
@@ -114,6 +120,10 @@ namespace Unity.MP_FPS.Upgrades
         // "off" look is defined in one place.
         private static readonly Color k_IdleBackground = new Color(0.06f, 0.07f, 0.09f, 0.72f);
         private static readonly Color k_IdleBorder = new Color(1f, 1f, 1f, 0.18f);
+
+        // And of a cell the player cannot pay for yet.
+        private static readonly Color k_UnaffordableBorder = new Color(0.85f, 0.25f, 0.25f, 0.45f);
+        private static readonly Color k_UnaffordablePrice = new Color(1f, 0.36f, 0.36f, 0.9f);
 
         private void OnEnable()
         {
@@ -284,7 +294,13 @@ namespace Unity.MP_FPS.Upgrades
                 // Not in the dictionary means not running, which is the resting state and
                 // by far the common one.
                 bool isRunning = m_Running.TryGetValue(view.Slot.Data.UpgradeId, out float remaining);
-                DrawCell(view, isRunning, remaining);
+
+                // Only a hint for the player, never a rule: the server re-checks the price
+                // at the moment of purchase, because the tank keeps draining while they
+                // are deciding. See IOxygenBank.
+                bool canAfford = m_OxygenSeconds >= view.Slot.Data.CostOxygen;
+
+                DrawCell(view, isRunning, canAfford, remaining);
             }
         }
 
@@ -377,6 +393,14 @@ namespace Unity.MP_FPS.Upgrades
 
                 var playerEntity = localPlayers[0];
 
+                // The wallet, read from the same entity. A player prefab without a tank
+                // keeps the infinity it started with rather than reporting no air, because
+                // "cannot be read" and "empty" are not the same thing.
+                if (m_EntityManager.HasComponent<PlayerOxygen>(playerEntity))
+                {
+                    m_OxygenSeconds = m_EntityManager.GetComponentData<PlayerOxygen>(playerEntity).Seconds;
+                }
+
                 // A player ghost baked before this buffer existed simply has nothing
                 // running, which is the honest thing to draw rather than an error.
                 if (!m_EntityManager.HasBuffer<ActiveUpgradeStatus>(playerEntity))
@@ -432,16 +456,22 @@ namespace Unity.MP_FPS.Upgrades
         /// <summary>
         /// Puts one cell into its running or its resting look.
         /// </summary>
-        private void DrawCell(SlotView view, bool isRunning, float remainingSeconds)
+        private void DrawCell(SlotView view, bool isRunning, bool canAfford, float remainingSeconds)
         {
             if (!isRunning)
             {
+                // Out of reach: the price goes red and the whole cell fades further back,
+                // so the player can tell at a glance that pressing the key is pointless
+                // rather than pressing it and wondering why nothing happened.
+                float iconAlpha = canAfford ? 0.35f : 0.15f;
+
                 view.Cell.style.backgroundColor = k_IdleBackground;
-                SetBorder(view.Cell, k_IdleBorder, 1f);
+                SetBorder(view.Cell, canAfford ? k_IdleBorder : k_UnaffordableBorder, 1f);
                 view.Fill.style.height = Length.Percent(0f);
-                view.Icon.style.unityBackgroundImageTintColor = new StyleColor(Dim(view.Slot.Tint));
-                view.Icon.style.backgroundColor = view.Slot.Icon != null ? Color.clear : Dim(view.Slot.Tint);
-                view.Price.style.color = new Color(1f, 1f, 1f, 0.7f);
+                view.Icon.style.unityBackgroundImageTintColor = new StyleColor(Fade(view.Slot.Tint, iconAlpha));
+                view.Icon.style.backgroundColor =
+                    view.Slot.Icon != null ? Color.clear : Fade(view.Slot.Tint, iconAlpha);
+                view.Price.style.color = canAfford ? new Color(1f, 1f, 1f, 0.7f) : k_UnaffordablePrice;
                 return;
             }
 
@@ -463,11 +493,12 @@ namespace Unity.MP_FPS.Upgrades
         }
 
         /// <summary>
-        /// The same colour, faded down to how a cell that is off should look.
+        /// The same colour at a different strength. A cell that is off is faded, and one
+        /// that cannot be paid for is fainter still.
         /// </summary>
-        private static Color Dim(Color colour)
+        private static Color Fade(Color colour, float alpha)
         {
-            return new Color(colour.r, colour.g, colour.b, 0.35f);
+            return new Color(colour.r, colour.g, colour.b, alpha);
         }
 
         /// <summary>

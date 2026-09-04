@@ -84,6 +84,7 @@ GameObject:
   - component: {fileID: 4234114073020964792}
   - component: {fileID: -8223600443337949996}
   - component: {fileID: -5497179297446900945}
+  - component: {fileID: 7678377142130768510}
   m_Layer: 0
   m_Name: ArmaturePlayer_Rifle
   m_TagString: Untagged
@@ -274,9 +275,9 @@ MonoBehaviour:
   <CrouchRotationSmoothTime>k__BackingField: 0.2
   <CrouchAnimationMotionScale>k__BackingField: 0.4
   <CrouchHeight>k__BackingField: 0.9
-  <JumpHeight>k__BackingField: 1.2
-  <Gravity>k__BackingField: -18
-  <TerminalVelocity>k__BackingField: -53
+  <JumpHeight>k__BackingField: 3.2
+  <Gravity>k__BackingField: -6.8
+  <TerminalVelocity>k__BackingField: -20
   <StandingFallSpeed>k__BackingField: -3.75
   <JumpTimeout>k__BackingField: 0
   <FallTimeout>k__BackingField: 0.15
@@ -345,6 +346,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Upgrades.PlayerUpgradeBridge
   m_SpeedBoostData: {fileID: 11400000, guid: 2e407cfb7a95795409aadbb7a1eea8f9, type: 2}
   m_DamageBoostData: {fileID: 11400000, guid: 3daf883785411c441b6d74063cf4633f, type: 2}
+  m_PlayerScanData: {fileID: 11400000, guid: cc56ad746a4b86e4694ee5796d8d8b1f, type: 2}
+--- !u!114 &7678377142130768510
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4348258020634402416}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004b86921778e5c4eb1f1be526066e15, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Minimap.MapRevealSystem
+  m_ScanRange: 150
 --- !u!1 &4657941816999191273
 GameObject:
   m_ObjectHideFlags: 0
