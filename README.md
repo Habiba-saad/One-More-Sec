@@ -2,7 +2,7 @@
 
 **Team No Bugs Inshallah**
 
-A 3D first-person multiplayer survival shooter for 4–6 players, set on a Mars colony
+A 3D first-person multiplayer survival shooter for 2–6 players, set on a Mars colony
 construction site. Oxygen is both the clock and the currency: it drains every second, it
 kills you when it runs out, and it is the only thing you can spend on the suit upgrades
 that keep you alive.
