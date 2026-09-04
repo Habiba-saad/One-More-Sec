@@ -116,5 +116,14 @@ public partial class ClientInputReaderSystem : SystemBase
         // triggered would only fire once the hold time had elapsed.
         playerInput.SetFlag(PlayerInput.InputFlag.RechargeToggle,
             controls.Player.Interact.WasPressedThisFrame());
+
+        // Bound to Player.Previous - the "1" key - which nothing else reads. A placeholder
+        // until the upgrade shop panel exists, at which point this whole flag goes away.
+        playerInput.SetFlag(PlayerInput.InputFlag.BuySpeedBoost,
+            controls.Player.Previous.WasPressedThisFrame());
+
+        // And Player.Next - the "2" key - for the damage boost, on the same terms.
+        playerInput.SetFlag(PlayerInput.InputFlag.BuyDamageBoost,
+            controls.Player.Next.WasPressedThisFrame());
     }
 }

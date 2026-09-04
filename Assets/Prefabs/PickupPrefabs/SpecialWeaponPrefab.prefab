@@ -139,7 +139,7 @@ MonoBehaviour:
   m_PickupId: 4
   m_Description: Special weapon
   m_ValueTier: 1
-  m_WeaponId: 1
+  m_WeaponId: 0
 --- !u!136 &831726596242763661
 CapsuleCollider:
   m_ObjectHideFlags: 0

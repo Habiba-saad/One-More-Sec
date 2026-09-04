@@ -12,7 +12,9 @@ public struct PlayerInput
         Sprint = 1 << 2,
         Reload = 1 << 3,
         Crouch = 1 << 4,
-        RechargeToggle = 1 << 5
+        RechargeToggle = 1 << 5,
+        BuySpeedBoost = 1 << 6,
+        BuyDamageBoost = 1 << 7
     }
 
     public float2 MoveInput;
@@ -32,6 +34,16 @@ public struct PlayerInput
     // A single press like Jump rather than a held key: it flips recharging on and off.
     // The latched state itself lives on ControllerState, not here.
     public bool RechargeToggle => (InputFlags & (uint)InputFlag.RechargeToggle) != 0;
+
+    // Temporary stand-in for the upgrade shop, so a purchase can be tested before there
+    // is a panel to click. Travels with the rest of the input because the purchase has to
+    // be made by the server - it spends oxygen, which only the server owns.
+    public bool BuySpeedBoost => (InputFlags & (uint)InputFlag.BuySpeedBoost) != 0;
+
+    // The same stand-in for the damage boost. Two flags rather than one "buy" flag plus
+    // an id, because the shop panel that replaces both of them will send a purchase
+    // request of its own and neither flag will survive it.
+    public bool BuyDamageBoost => (InputFlags & (uint)InputFlag.BuyDamageBoost) != 0;
 
     public void SetFlag(InputFlag flag, bool set)
     {

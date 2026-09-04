@@ -281,7 +281,8 @@ public partial class PlayerPredictionSystem : SingletonSystem<PlayerPredictionSy
                             FirstPersonController.AccumulateMovement(ref predictedPlayer.ValueRW.ControllerState,
                                 ref predictedPlayer.ValueRW.AccumulatedMovement,
                                 input,
-                                controllerConsts.ValueRO.ControllerConsts, accumulateDT);
+                                controllerConsts.ValueRO.ControllerConsts, accumulateDT,
+                                predictedPlayer.ValueRO.SpeedMultiplier);
                             
                             if (predictedPlayer.ValueRW.ControllerState.JumpTriggered)
                             {

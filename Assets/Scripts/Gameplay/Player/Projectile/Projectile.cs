@@ -24,6 +24,12 @@ namespace Unity.MP_FPS
             [GhostField] public int OwnerNetworkId;
             [GhostField] public uint SpawnTick;
             [GhostField] public uint WeaponID;
+
+            // The shooter's damage multiplier as it was when this shot was fired. Set once
+            // at spawn and never touched again, so the shot keeps the strength it left the
+            // barrel with even if the boost wears off while it is still travelling - which
+            // is exactly what DamageBoost.Activate promises.
+            [GhostField] public float DamageMultiplier;
         }
 
         public class PredictedProjectileInfo
@@ -155,6 +161,12 @@ namespace Unity.MP_FPS
             var weaponData = WeaponManager.Instance.WeaponRegistry.GetWeaponData(projectileData.WeaponID);
             int shooterNetworkId = projectileData.OwnerNetworkId;
 
+            // Worked out once here for both branches below. The guard covers a projectile
+            // spawned by something that does not fill the field in - it would otherwise
+            // arrive as 0 and the shot would land for no damage at all.
+            float damage = weaponData.Damage *
+                           (projectileData.DamageMultiplier > 0f ? projectileData.DamageMultiplier : 1f);
+
             var serverCurrentTick = GhostGameObject.GetCurrentTick();
 
             // Check the behavior type to decide the damage logic.
@@ -180,13 +192,13 @@ namespace Unity.MP_FPS
                         var targetPredictedPlayer = playerGhostLookup.GetRefRW(hitGhostObject.LinkedEntity);
 
                         var healthBeforeDamage = targetPredictedPlayer.ValueRO.CurrentHealth;
-                        targetPredictedPlayer.ValueRW.CurrentHealth -= weaponData.Damage;
+                        targetPredictedPlayer.ValueRW.CurrentHealth -= damage;
 
                         // Set the simple flag for animations
                         targetPredictedPlayer.ValueRW.ControllerState.IsHit = true;
 
                         // Set the detailed data for the 1P visual effect
-                        targetPredictedPlayer.ValueRW.LastDamageAmount = weaponData.Damage;
+                        targetPredictedPlayer.ValueRW.LastDamageAmount = damage;
                         targetPredictedPlayer.ValueRW.LastHitTick = serverCurrentTick;
 
                         if (healthBeforeDamage > 0 && targetPredictedPlayer.ValueRO.CurrentHealth <= 0)
@@ -232,9 +244,9 @@ namespace Unity.MP_FPS
                             $"2 hitPlayerOwner.NetworkId: {hitPlayerOwner.NetworkId.ToString()}, projectileData.OwnerNetworkId: {projectileData.OwnerNetworkId.ToString()}");
                         var targetPredictedPlayer = playerGhostLookup.GetRefRW(hitGhostObject.LinkedEntity);
                         var healthBeforeDamage = targetPredictedPlayer.ValueRO.CurrentHealth;
-                        targetPredictedPlayer.ValueRW.CurrentHealth -= weaponData.Damage;
+                        targetPredictedPlayer.ValueRW.CurrentHealth -= damage;
                         targetPredictedPlayer.ValueRW.ControllerState.IsHit = true;
-                        targetPredictedPlayer.ValueRW.LastDamageAmount = weaponData.Damage;
+                        targetPredictedPlayer.ValueRW.LastDamageAmount = damage;
                         targetPredictedPlayer.ValueRW.LastHitTick = serverCurrentTick;
 
                         if (healthBeforeDamage > 0 && targetPredictedPlayer.ValueRO.CurrentHealth <= 0)

@@ -15,4 +15,4 @@ MonoBehaviour:
   m_UpgradeId: 1
   m_CostOxygen: 15
   m_Duration: 10
-  m_EffectMultiplier: 1.3
+  m_EffectMultiplier: 3

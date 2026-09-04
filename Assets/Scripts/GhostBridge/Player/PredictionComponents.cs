@@ -49,6 +49,19 @@ public struct PredictedPlayerGhost : IComponentData
 
     [GhostField] public int InputIndex;
 
+    // Everything currently multiplying this player's move speed, already combined into
+    // one number by PlayerUpgradeBridge. Replicated because movement is predicted: the
+    // client works out its own position from this too, so a value only the server knew
+    // would have the two disagreeing every tick a boost was running.
+    [GhostField] public float SpeedMultiplier;
+
+    // The same idea for the damage this player deals: everything DamageBoost has
+    // registered, already combined by PlayerUpgradeBridge. Only the server reads it when
+    // a shot lands, but it is replicated anyway so the owning client's HUD can show that
+    // a boost is running - and it costs almost nothing, because a value that does not
+    // change between two snapshots is not resent.
+    [GhostField] public float DamageMultiplier;
+
     [GhostField] public ControllerState ControllerState;
     [GhostField] public float CurrentHealth;
     [GhostField] public float MaxHealth;

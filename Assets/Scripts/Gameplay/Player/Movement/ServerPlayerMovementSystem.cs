@@ -21,6 +21,11 @@ namespace Unity.MP_FPS
         public int OwnerNetworkId;
         public uint SpawnTick;
         public uint WeaponId;
+
+        // The shooter's damage multiplier at the moment the trigger was pulled. Carried on
+        // the shot itself rather than looked up again on impact, so a boost that expires
+        // while the rocket is still in the air does not weaken a shot already fired.
+        public float DamageMultiplier;
     }
 
     struct VfxSpawnData
@@ -347,11 +352,23 @@ namespace Unity.MP_FPS
                                                     continue;
                                                 }
 
+                                                // Scaled by whatever the shooter's suit upgrades have
+                                                // registered. Read from the shooter and not the target,
+                                                // because a boost makes you hit harder - it does not make
+                                                // the other player easier to hit. The guard is for a ghost
+                                                // baked before the field existed, which would otherwise
+                                                // arrive as 0 and make every shot harmless.
+                                                float shooterDamageMultiplier =
+                                                    predictedPlayer.ValueRO.DamageMultiplier > 0f
+                                                        ? predictedPlayer.ValueRO.DamageMultiplier
+                                                        : 1f;
+                                                float damage = weaponData.Damage * shooterDamageMultiplier;
+
                                                 var healthBeforeDamage = targetPredictedPlayer.ValueRO.CurrentHealth;
-                                                targetPredictedPlayer.ValueRW.CurrentHealth -= weaponData.Damage;
+                                                targetPredictedPlayer.ValueRW.CurrentHealth -= damage;
                                                 targetPredictedPlayer.ValueRW.ControllerState.IsHit = true;
 
-                                                targetPredictedPlayer.ValueRW.LastDamageAmount = weaponData.Damage;
+                                                targetPredictedPlayer.ValueRW.LastDamageAmount = damage;
                                                 targetPredictedPlayer.ValueRW.LastHitTick = serverTick;
 
                                                 if (healthBeforeDamage > 0 &&
@@ -419,7 +436,10 @@ namespace Unity.MP_FPS
                                             Rotation = spawnRotation,
                                             OwnerNetworkId = ghostOwnerLookup[entity].NetworkId,
                                             SpawnTick = commandInput.Tick.TickIndexForValidTick,
-                                            WeaponId = predictedPlayer.ValueRO.EquippedWeaponID
+                                            WeaponId = predictedPlayer.ValueRO.EquippedWeaponID,
+                                            DamageMultiplier = predictedPlayer.ValueRO.DamageMultiplier > 0f
+                                                ? predictedPlayer.ValueRO.DamageMultiplier
+                                                : 1f
                                         });
                                     }
 
@@ -445,7 +465,8 @@ namespace Unity.MP_FPS
                         {
                             OwnerNetworkId = spawnData.OwnerNetworkId,
                             SpawnTick = spawnData.SpawnTick,
-                            WeaponID = spawnData.WeaponId
+                            WeaponID = spawnData.WeaponId,
+                            DamageMultiplier = spawnData.DamageMultiplier
                         });
                     });
             }
@@ -481,7 +502,8 @@ namespace Unity.MP_FPS
                                 ref predictedPlayer.ValueRW.AccumulatedMovement,
                                 input,
                                 controllerConsts.ValueRO.ControllerConsts,
-                                movementDt);
+                                movementDt,
+                                predictedPlayer.ValueRO.SpeedMultiplier);
                         }
                     }
 

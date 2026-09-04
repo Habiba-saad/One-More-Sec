@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1994700242a36794b848d751f44a2ec6, type: 3}
   m_Name: DamageBoostData
   m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Upgrades.SuitUpgradeData
-  m_UpgradeId: 1
+  m_UpgradeId: 2
   m_CostOxygen: 15
   m_Duration: 10
   m_EffectMultiplier: 1.3

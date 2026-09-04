@@ -857,7 +857,8 @@ public class FirstPersonController : MonoBehaviour
     }
 
     public static void AccumulateMovement(ref ControllerState state,
-        ref float3 accumulatedMovement, in PlayerInput rawInput, in ControllerConsts consts, float deltaTime)
+        ref float3 accumulatedMovement, in PlayerInput rawInput, in ControllerConsts consts, float deltaTime,
+        float speedMultiplier = 1f)
     {
         // Recharging is resolved here, and from the input alone, rather than on the server
         // by itself. The client predicts its own movement by calling this same method with
@@ -909,7 +910,10 @@ public class FirstPersonController : MonoBehaviour
 
         var updateRotation = true;
 
-        float combinedMoveSpeedModifier = 1f;
+        // Whatever the suit upgrades have registered, arriving already combined. Guarded
+        // against zero so that a player whose ghost has not been baked with a multiplier
+        // yet walks at normal speed instead of being frozen in place.
+        float combinedMoveSpeedModifier = speedMultiplier > 0f ? speedMultiplier : 1f;
 
         float modifiedTargetMoveSpeed =
             stateConsts.Speed * combinedMoveSpeedModifier; //don't apply modifiers to the aiming speed

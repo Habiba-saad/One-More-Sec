@@ -217,7 +217,15 @@ namespace Unity.MP_FPS
                 MaxHealth = 100f,
                 CurrentHealth = 100f,
                 EquippedWeaponID = weaponId,
-                CurrentAmmo = magazineSize
+                CurrentAmmo = magazineSize,
+
+                // Both suit multipliers start at "no upgrade running". They have to be
+                // named here even though the baker already set them, because this writes a
+                // whole new component over the baked one and anything left out of this
+                // list goes back to the struct default - which for these two is 0, and a
+                // player at 0 cannot move and deals no damage.
+                SpeedMultiplier = 1f,
+                DamageMultiplier = 1f
             });
             ecb.AddComponent(playerEntity, new PlayerCharacterInitialized());
             ecb.SetComponentEnabled<PlayerCharacterInitialized>(playerEntity, false);

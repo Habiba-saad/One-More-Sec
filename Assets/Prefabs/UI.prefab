@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2236236808725699780}
   - component: {fileID: 8282623618274618385}
   - component: {fileID: 3698867596173793052}
+  - component: {fileID: 3296214419366057403}
   m_Layer: 0
   m_Name: HUD
   m_TagString: Untagged
@@ -82,6 +83,33 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b888ffa6d82d74a9b350798131f093, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Oxygen.OxygenHud
+--- !u!114 &3296214419366057403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 316593676404671401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9836e4c57305e84180bf935b6c3e835, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Upgrades.UpgradeShopPanel
+  m_Slots:
+  - Data: {fileID: 11400000, guid: 2e407cfb7a95795409aadbb7a1eea8f9, type: 2}
+    Icon: {fileID: 2800000, guid: 602cf83d33a0fde4485f86d2bd69e00a, type: 3}
+    Tint: {r: 1, g: 0.8431373, b: 0, a: 1}
+    HotKeyLabel: 1
+  - Data: {fileID: 11400000, guid: 3daf883785411c441b6d74063cf4633f, type: 2}
+    Icon: {fileID: 2800000, guid: da359867cfc0a5c428cfac3d91b114fb, type: 3}
+    Tint: {r: 0.1882353, g: 0.682353, b: 0.7490196, a: 1}
+    HotKeyLabel: 2
+  - Data: {fileID: 11400000, guid: cc56ad746a4b86e4694ee5796d8d8b1f, type: 2}
+    Icon: {fileID: 2800000, guid: e195cd1a8f1b4e849a117b7b11002944, type: 3}
+    Tint: {r: 0, g: 0.3921569, b: 0, a: 1}
+    HotKeyLabel: 3
+  m_CellSize: 90
+  m_ScreenMargin: 24
 --- !u!1 &320253217878538870
 GameObject:
   m_ObjectHideFlags: 0
