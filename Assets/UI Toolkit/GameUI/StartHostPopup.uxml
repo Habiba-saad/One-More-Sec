@@ -8,6 +8,10 @@
                         <ui:Label text="Port" name="PortLabel" picking-mode="Ignore" />
                         <ui:TextField name="PortField" tabindex="6" value="7979" />
                     </ui:VisualElement>
+                    <ui:VisualElement name="MatchFormatContainer" picking-mode="Ignore" class="section-separator">
+                        <ui:Label text="Match Format" name="MatchFormatLabel" picking-mode="Ignore" />
+                        <ui:DropdownField name="MatchFormatField" tabindex="7" index="0" />
+                    </ui:VisualElement>
                     <ui:Button text="Start" name="StartButton" tabindex="11" />
                     <ui:Button text="Cancel" name="CancelButton" tabindex="11" />
                 </ui:VisualElement>

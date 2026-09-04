@@ -201,11 +201,18 @@ namespace Unity.MP_FPS
             ecb.AddBuffer<ClientCommandInput>(clientInputEntity);
             ecb.SetComponent(clientInputEntity, new PlayerCommandTarget { NetworkId = ownerNetworkId.Value });
 
-            // Instantiate the player entity
-            var playerEntityPrefab = characterIndex == 0 ? playerEntityPrefabs.PlayerRifleEntityPrefab : playerEntityPrefabs.PlayerShotgunEntityPrefab;
+            // Instantiate the player entity.
+            //
+            // Everybody starts a round with the shotgun. The rifle is not a choice any
+            // more - it is something to be won from a supply drop - so the loadout is
+            // decided here on the server rather than taken from whatever the client asked
+            // for. characterIndex still arrives on the join request because the rest of
+            // the flow carries it, but nothing reads it while there is one starting
+            // loadout for everyone.
+            var playerEntityPrefab = playerEntityPrefabs.PlayerShotgunEntityPrefab;
             var playerEntity = ecb.Instantiate(playerEntityPrefab);
 
-            var weaponId = characterIndex == 0 ? (uint)0 : 1;
+            var weaponId = (uint)1;
             
             var weaponData = WeaponManager.Instance.WeaponRegistry.GetWeaponData(weaponId);
             var magazineSize = weaponData != null ? weaponData.MagazineSize : 30; // Default to 30 if weapon not found

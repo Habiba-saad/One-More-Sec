@@ -202,6 +202,15 @@ namespace Unity.MP_FPS.Match
         /// </summary>
         private void UpdateWaiting(ref MatchStateData data)
         {
+            // Taken from the lobby while there is still time to change it. Only applied
+            // when somebody actually chose: a match started without the menu - a dedicated
+            // server, or pressing play straight into the game scene - keeps the format set
+            // on this prefab instead of being forced to the default.
+            if (MatchSettings.HasSelection)
+            {
+                m_Format = MatchSettings.SelectedFormat;
+            }
+
             if (CountPlayers(out _) < m_MinPlayersToStart)
             {
                 return;

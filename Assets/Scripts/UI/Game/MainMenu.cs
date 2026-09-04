@@ -11,7 +11,6 @@ namespace Unity.MP_FPS.Client
         {
             public const string HidingBackground = "HidingBackground";
             public const string NameInputField = "PlayerNameField";
-            public const string ChooseCharacterOption = "ChooseCharacterOption";
             public const string ConnectionModeOption = "ConnetionModeOption";
             public const string SessionNameLabel = "SessionName";
             public const string SessionInputField = "SessionNameField";
@@ -22,7 +21,6 @@ namespace Unity.MP_FPS.Client
         }
 
         VisualElement m_MainMenu;
-        RadioButtonGroup m_ChosseCharacterGroup;
         RadioButtonGroup m_ConnectionModeGroup;
         Label m_SessionNameLabel;
         TextField m_SessionNameField;
@@ -50,14 +48,11 @@ namespace Unity.MP_FPS.Client
                 bindingMode = BindingMode.TwoWay,
             });
 
-            m_ChosseCharacterGroup = m_MainMenu.Q<RadioButtonGroup>(UIElementNames.ChooseCharacterOption);
-            m_ChosseCharacterGroup.SetBinding("value", new DataBinding
-            {
-                dataSource = GameSettings.Instance,
-                dataSourcePath = new PropertyPath(nameof(GameSettings.PlayerCharacter)),
-                bindingMode = BindingMode.TwoWay,
-            });
-            
+            // The character picker is gone: every player now starts the round with the
+            // shotgun, and the rifle is something to be won from a supply drop rather than
+            // chosen in a menu. The server decides the loadout either way - see
+            // ServerGameSystem.SpawnPlayerCharacter - so nothing here needs to say it.
+
             m_SessionNameLabel = m_MainMenu.Q<Label>(UIElementNames.SessionNameLabel);
             var connectionMode = m_ConnectionModeGroup = m_MainMenu.Q<RadioButtonGroup>(UIElementNames.ConnectionModeOption);
             connectionMode.SetBinding("value", new DataBinding

@@ -48,7 +48,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unity.MP_FPS.Match.MatchManager
   m_Format: 0
-  m_RoundSeconds: 150
+  m_RoundSeconds: 350
   m_RoundStartSeconds: 5
   m_RoundEndSeconds: 6
   m_MinPlayersToStart: 2

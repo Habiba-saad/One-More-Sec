@@ -5,11 +5,12 @@
         <ui:VisualElement name="Container" picking-mode="Ignore" class="container" style="background-image: url(&quot;project://database/Assets/Art/Textures/Grid_01_Emissive.png?fileID=2800000&amp;guid=d4d6919451fe3e24388816386a6d15a4&amp;type=3#Grid_01_Emissive&quot;); height: auto;">
             <ui:VisualElement name="UIWrapper" picking-mode="Ignore">
                 <ui:VisualElement name="ConnectionPanel" picking-mode="Ignore">
+                    <ui:Label text="ONE MORE SEC" name="GameTitle" picking-mode="Ignore" style="font-size: 42px; -unity-text-align: middle-center; color: rgb(255, 255, 255); letter-spacing: 6px; margin-bottom: 4px;" />
+                    <ui:Label text="MARS COLONY SITE" name="GameSubtitle" picking-mode="Ignore" class="section-separator" style="font-size: 12px; -unity-text-align: middle-center; color: rgba(255, 255, 255, 0.5); letter-spacing: 4px;" />
                     <ui:VisualElement name="InputPlayerName" picking-mode="Ignore" class="section-separator">
                         <ui:Label text="Player Name" name="PlayerName" picking-mode="Ignore" />
                         <ui:TextField name="PlayerNameField" value="_" tabindex="1" />
                     </ui:VisualElement>
-                    <ui:RadioButtonGroup label="Choose Character" choices="Rifle,Shotgun" value="-1" name="ChooseCharacterOption" style="border-left-color: rgb(131, 180, 222); border-right-color: rgb(131, 180, 222); border-top-color: rgb(131, 180, 222); border-bottom-color: rgb(131, 180, 222); border-bottom-width: 2px; border-right-width: 2px; border-top-width: 2px; border-left-width: 2px;" />
                     <ui:RadioButtonGroup label="Connection Mode" choices="Relay,Direct" value="-1" name="ConnetionModeOption" style="border-left-color: rgb(131, 180, 222); border-right-color: rgb(131, 180, 222); border-top-color: rgb(131, 180, 222); border-bottom-color: rgb(131, 180, 222); border-bottom-width: 2px; border-right-width: 2px; border-top-width: 2px; border-left-width: 2px;" />
                     <ui:VisualElement name="InputSessionName" picking-mode="Ignore" class="section-separator">
                         <ui:Label text="Session Name" name="SessionName" picking-mode="Ignore" />
