@@ -176,7 +176,6 @@ an interface, and a dotted arrow for a plain dependency. A full key sits under t
 * `PickupManager` — spawning med kits around the map each round.
 * `SupplyDropManager`, `Spaceship`, `SupplyDrop` — the supply ship that flies over each
   round and drops one high-value item.
-* `RechargeSystem` as its own class; oxygen recharge currently lives in the movement code.
 * `InventoryComponent` and `InventorySlot` are written but not yet wired to the player —
   they are exercised only by the sandbox test dummy.
 
