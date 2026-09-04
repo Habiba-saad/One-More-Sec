@@ -181,4 +181,5 @@ an interface, and a dotted arrow for a plain dependency. A full key sits under t
 
 ----
 
-![Swag Cat](https://tenor.com/view/swag-cat-swagbilli-cutecat-cats-cat-swag-ok-yooo-yo-gif-8148366958341854995)
+<img width="416" height="295" alt="image" src="https://github.com/user-attachments/assets/a9f4c4dd-23af-4e42-a68f-aa083811f7ee" />
+
